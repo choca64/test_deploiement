@@ -1,15 +1,15 @@
-# Environments files
+# Environments files (not the Angular ones!)
 **/.env.development
 **/.env.production
 **/.venv
-**/environments/*
-/frontend/src/environments/*
 .env
 
+# Backend env (contains secrets)
+backend_ndi_2025/.env
 
-# Do not ignore example .env
-!/.env.sample
-!/frontend/src/environments/environment.sample.ts
+# Do not ignore Angular environment files (they don't contain secrets in prod)
+!frontend_ndi_2025/src/environments/
+!frontend_ndi_2025/src/environments/*.ts
 
 # Local files
 **/delDeps.bat
