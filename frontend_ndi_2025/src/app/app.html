@@ -1,0 +1,8 @@
+<!-- Loading Screen -->
+<app-loading-screen></app-loading-screen>
+
+<!-- Main Content with Route Animations -->
+<div class="page-wrapper" [@routeAnimations]="prepareRoute(outlet)">
+  <router-outlet #outlet="outlet"></router-outlet>
+</div>
+<router-outlet />

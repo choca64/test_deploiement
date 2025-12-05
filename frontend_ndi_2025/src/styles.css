@@ -1,0 +1,82 @@
+/* ===========================
+ *  HIPPEAS-INSPIRED PLAYFUL STYLE
+ *  Nuit de l'Info 2025
+ * =========================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap');
+
+:root {
+  /* HIPPEAS Color Palette */
+  --yellow: #F5D547;
+  --yellow-light: #FFF0B3;
+  --yellow-dark: #E5C537;
+  
+  --teal: #3DB4AD;
+  --teal-light: #5ECEC7;
+  --teal-dark: #1B4D4A;
+  
+  --mint: #B8E5D6;
+  --cream: #FFF8E7;
+  --coral: #FF7F6B;
+  --orange: #FFA54F;
+  
+  --white: #FFFFFF;
+  --black: #1a1a1a;
+  --gray: #666666;
+  --gray-light: #f5f5f5;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+  
+  /* Border Radius - Very rounded */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 30px;
+  --radius-xl: 50px;
+  --radius-full: 9999px;
+  
+  /* Typography */
+  --font-display: 'Fredoka', sans-serif;
+  --font-body: 'Quicksand', sans-serif;
+}
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--black);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Selection */
+::selection {
+  background: #4ecdc4;
+  color: #000;
+}
+
+/* Focus outline */
+:focus-visible {
+  outline: 2px solid #4ecdc4;
+  outline-offset: 2px;
+}
+
+/* Disable text selection during gameplay */
+.game-container {
+  user-select: none;
+  -webkit-user-select: none;
+}

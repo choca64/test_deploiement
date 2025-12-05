@@ -1,0 +1,26 @@
+# Environments files
+**/.env.development
+**/.env.production
+**/.venv
+/frontend/src/environments/*
+.env
+
+
+# Do not ignore example .env
+!/.env.sample
+!/frontend/src/environments/environment.sample.ts
+
+# Local files
+**/delDeps.bat
+**/noteRU.txt
+**/.vscode
+**/note.txt
+
+#node_modules
+**/node_modules
+
+# Logs
+**/logs
+
+dist
+
