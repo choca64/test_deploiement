@@ -213,11 +213,14 @@ export class Card implements AfterViewInit, OnDestroy, OnInit {
       return;
     }
 
+    console.log('========================================');
     console.log('📤 [CONTACT] Envoi message...');
-    console.log('   - Connecté:', this.isLoggedIn);
-    console.log('   - User:', this.currentUser?.username);
-    console.log('   - Talent ID:', this.talent.id);
-    console.log('   - Talent userId:', this.talent.userId);
+    console.log('   - MON userId (expéditeur):', this.currentUser?.id);
+    console.log('   - MON username:', this.currentUser?.username);
+    console.log('   - TALENT complet:', JSON.stringify(this.talent, null, 2));
+    console.log('   - TALENT userId (destinataire):', this.talent.userId);
+    console.log('   - TALENT id:', this.talent.id);
+    console.log('========================================');
 
     // Si l'utilisateur est connecté, enregistrer le message dans la BDD
     if (this.isLoggedIn && this.currentUser) {
@@ -227,9 +230,12 @@ export class Card implements AfterViewInit, OnDestroy, OnInit {
       const projectLabel = this.getProjectTypeLabel(this.contactForm.projectType);
       const fullMessage = `📋 ${projectLabel}\n\n${this.contactForm.message}`;
       
+      // Utiliser le userId du talent si disponible, sinon utiliser l'ID du talent comme référence
+      const targetId = this.talent.userId || `talent_${this.talent.id}`;
+      console.log('🎯 [CONTACT] targetId final:', targetId);
+      console.log('   → Est-ce un vrai userId?', !targetId.startsWith('talent_'));
+      
       try {
-        // Utiliser le userId du talent si disponible, sinon utiliser l'ID du talent comme référence
-        const targetId = this.talent.userId || `talent_${this.talent.id}`;
         
         const result = await this.messagingService.sendDirectMessage(
           targetId,

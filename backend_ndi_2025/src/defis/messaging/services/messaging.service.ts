@@ -94,6 +94,8 @@ export class MessagingService {
       participants.push({ conversation_id: newConv.id, user_id: userId2 });
     }
 
+    console.log('👥 [MESSAGING] Ajout participants:', participants.map(p => p.user_id));
+
     const { error: partError } = await client
       .from('conversation_participants')
       .insert(participants);
@@ -103,8 +105,10 @@ export class MessagingService {
       throw partError;
     }
 
-    console.log('✅ [MESSAGING] Participants ajoutés');
+    console.log('✅ [MESSAGING] Participants ajoutés avec succès !');
     console.log('✨ [MESSAGING] Nouvelle conversation créée:', newConv.id);
+    console.log('   - Participant 1:', userId1);
+    console.log('   - Participant 2:', isTalentOnly ? '(talent sans compte)' : userId2);
     return newConv.id;
   }
 
@@ -180,19 +184,28 @@ export class MessagingService {
    * Obtenir les conversations d'un utilisateur
    */
   async getUserConversations(userId: string): Promise<Conversation[]> {
-    console.log('📋 [MESSAGING] Récupération conversations pour', userId);
+    console.log('📋 [MESSAGING] ========================================');
+    console.log('📋 [MESSAGING] Récupération conversations pour userId:', userId);
 
     const client = this.supabase.getClient();
 
     // Récupérer les IDs des conversations
-    const { data: participations } = await client
+    const { data: participations, error: partError } = await client
       .from('conversation_participants')
       .select('conversation_id')
       .eq('user_id', userId);
 
+    console.log('📋 [MESSAGING] Participations trouvées:', participations);
+    if (partError) {
+      console.error('❌ [MESSAGING] Erreur récupération participations:', partError);
+    }
+
     if (!participations || participations.length === 0) {
+      console.log('📋 [MESSAGING] Aucune conversation pour cet utilisateur');
       return [];
     }
+
+    console.log('📋 [MESSAGING] Nombre de conversations:', participations.length);
 
     const convIds = participations.map(p => p.conversation_id);
 
