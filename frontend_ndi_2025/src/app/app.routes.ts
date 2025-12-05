@@ -31,15 +31,5 @@ export const routes: Routes = [
         loadComponent: () => import('./defis/carte-talents/pages/collaborations-page/collaborations-page').then(m => m.CollaborationsPage),
         data: { animation: 'CollaborationsPage' }
     },
-    {
-      path: '',
-      redirectTo: 'nird',
-      pathMatch: 'full'
-    },
-    {
-      path: 'nird',
-      loadComponent: () => import('./defis-national/pages/nird-space/nird-space.component')
-        .then(m => m.NirdSpaceComponent),
-      title: 'NIRD Space Mission - Défi National'
-    }
+  
 ];
