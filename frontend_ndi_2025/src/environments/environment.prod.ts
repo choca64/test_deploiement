@@ -6,8 +6,7 @@ export const environment = {
   production: true,
   
   // URL du backend NestJS sur Render
-  // ⚠️ REMPLACE PAR TON URL RENDER (ex: https://ndi-2025-backend.onrender.com)
-  apiUrl: 'https://ndi-2025-backend.onrender.com',
+  apiUrl: 'https://test-deploiement-backend-ndi-2025.onrender.com',
   
   // Configuration Supabase
   supabase: {
