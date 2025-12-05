@@ -144,7 +144,15 @@ export class MessagesPanel implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   isOwnMessage(message: Message): boolean {
-    return message.sender_id === this.currentUser?.id;
+    const isOwn = message.sender_id === this.currentUser?.id;
+    // Debug pour voir ce qui se passe
+    console.log('🔍 isOwnMessage check:', {
+      msgSenderId: message.sender_id,
+      currentUserId: this.currentUser?.id,
+      isOwn: isOwn,
+      senderName: message.sender_name
+    });
+    return isOwn;
   }
 
   formatTime(dateStr: string): string {

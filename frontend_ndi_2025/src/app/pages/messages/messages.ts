@@ -90,7 +90,14 @@ export class MessagesPage implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   isOwnMessage(message: Message): boolean {
-    return message.sender_id === this.currentUser?.id;
+    const isOwn = message.sender_id === this.currentUser?.id;
+    console.log('🔍 [PAGE] isOwnMessage:', {
+      msgSenderId: message.sender_id,
+      currentUserId: this.currentUser?.id,
+      isOwn,
+      senderName: message.sender_name
+    });
+    return isOwn;
   }
 
   formatTime(dateStr: string): string {

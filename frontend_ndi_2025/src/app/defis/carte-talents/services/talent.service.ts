@@ -606,7 +606,9 @@ export class TalentService {
       projets: apiData.projets || [],
       tags: apiData.tags || [],
       verified: apiData.verified || false,
-      createdAt: new Date(apiData.created_at)
+      createdAt: new Date(apiData.created_at),
+      // IMPORTANT: Récupérer le lien vers le compte utilisateur
+      userId: apiData.user_id
     };
   }
 
@@ -655,7 +657,9 @@ export class TalentService {
       passions: talent.passions,
       projets: talent.projets,
       tags: talent.tags,
-      verified: talent.verified
+      verified: talent.verified,
+      // IMPORTANT: Lier le talent au compte utilisateur !
+      user_id: talent.userId
     };
   }
 
