@@ -3,9 +3,12 @@ import {
   Component,
   ElementRef,
   OnDestroy,
+  OnInit,
   ViewChild
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { AuthService, User } from '../../../../auth/services/auth.service';
 
 declare const gsap: any;
 declare const ScrollTrigger: any;
@@ -13,11 +16,11 @@ declare const ScrollTrigger: any;
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './landing-page.html',
   styleUrls: ['./landing-page.css']
 })
-export class LandingPage implements AfterViewInit, OnDestroy {
+export class LandingPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('landingRoot', { static: true })
   landingRoot!: ElementRef<HTMLDivElement>;
 
@@ -26,6 +29,25 @@ export class LandingPage implements AfterViewInit, OnDestroy {
 
   private scrollTriggers: any[] = [];
   private mouseMoveHandler: ((e: MouseEvent) => void) | null = null;
+
+  // Auth
+  isLoggedIn = false;
+  currentUser: User | null = null;
+
+  constructor(private authService: AuthService) {}
+
+  ngOnInit(): void {
+    this.authService.isAuthenticated$.subscribe(isAuth => {
+      this.isLoggedIn = isAuth;
+    });
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
+  }
+
+  logout(): void {
+    this.authService.logout();
+  }
 
   ngAfterViewInit(): void {
     gsap.registerPlugin(ScrollTrigger);

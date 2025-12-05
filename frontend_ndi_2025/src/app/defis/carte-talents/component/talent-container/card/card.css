@@ -1169,6 +1169,159 @@
   margin: 0;
 }
 
+.contact-success .success-hint {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+  border: 2px solid #1a1a1a;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+}
+
+.btn-close-success {
+  margin-top: 1.2rem;
+  padding: 0.7rem 1.5rem;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: linear-gradient(135deg, #F5D547 0%, #E8C84A 100%);
+  border: 3px solid #1a1a1a;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 4px 4px 0 #1a1a1a;
+}
+
+.btn-close-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0 #1a1a1a;
+}
+
+/* Form Actions Split */
+.form-actions-split {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.form-actions-right {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.btn-collab {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.8rem 1.2rem;
+  background: linear-gradient(135deg, #3DB4AD 0%, #2D8A84 100%);
+  color: #fff;
+  border: 3px solid #1a1a1a;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 4px 4px 0 #1a1a1a;
+}
+
+.btn-collab:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0 #1a1a1a;
+}
+
+.btn-collab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Logged User Banner */
+.logged-user-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border: 3px solid #1a1a1a;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.logged-user-banner .user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  color: #fff;
+  font-size: 1rem;
+  border: 2px solid #1a1a1a;
+}
+
+.logged-user-banner .user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.logged-user-banner .user-info strong {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+}
+
+.logged-user-banner .user-info span {
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.badge-connected {
+  font-size: 0.8rem;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+/* Login Invite */
+.login-invite {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+  border: 3px solid #1a1a1a;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.login-invite p {
+  flex: 1;
+  margin: 0;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+}
+
+.btn-login-invite {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #F5D547 0%, #E8C84A 100%);
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-login-invite:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 3px 0 #1a1a1a;
+}
+
 /* Responsive */
 @media (max-width: 540px) {
   .contact-modal {

@@ -1,12 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { LoadingScreen } from './components/loading-screen/loading-screen';
+import { MessagesPanel } from './components/messages-panel/messages-panel';
 import { routeAnimations } from './animations/route-animations';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, LoadingScreen],
+  imports: [RouterOutlet, LoadingScreen, MessagesPanel],
   templateUrl: './app.html',
   styleUrl: './app.css',
   animations: [routeAnimations]

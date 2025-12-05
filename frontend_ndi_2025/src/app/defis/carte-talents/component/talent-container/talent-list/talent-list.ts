@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Talent, TalentService } from '../../../services/talent.service';
 import { Card } from '../card/card';
+import { AuthService, User } from '../../../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-talent-list',
@@ -23,9 +24,16 @@ export class TalentList implements OnInit, OnDestroy {
 
   villes: string[] = [];
 
+  // Auth
+  isLoggedIn = false;
+  currentUser: User | null = null;
+
   private subscription?: Subscription;
 
-  constructor(private talentService: TalentService) {}
+  constructor(
+    private talentService: TalentService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     // S'abonner aux changements de talents
@@ -35,6 +43,18 @@ export class TalentList implements OnInit, OnDestroy {
       this.applyFilters();
       console.log('📋 Liste des talents mise à jour:', talents.length);
     });
+
+    // Auth subscriptions
+    this.authService.isAuthenticated$.subscribe(isAuth => {
+      this.isLoggedIn = isAuth;
+    });
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 
   ngOnDestroy() {

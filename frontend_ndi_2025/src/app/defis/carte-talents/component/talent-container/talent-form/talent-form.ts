@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { 
@@ -8,6 +8,7 @@ import {
   CategorieTalent,
   ImpactLevel 
 } from '../../../services/talent.service';
+import { AuthService, User } from '../../../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-talent-form',
@@ -16,8 +17,10 @@ import {
   templateUrl: './talent-form.html',
   styleUrls: ['./talent-form.css']
 })
-export class TalentForm {
+export class TalentForm implements OnInit {
   @Output() talentCreated = new EventEmitter<Talent>();
+
+  currentUser: User | null = null;
 
   // Options pour les selects
   niveaux: NiveauMaitrise[] = ['débutant', 'intermédiaire', 'avancé', 'expert', 'maître', 'légendaire'];
@@ -137,7 +140,23 @@ export class TalentForm {
   currentStep = 1;
   totalSteps = 6;
 
-  constructor(private talentService: TalentService) {}
+  constructor(
+    private talentService: TalentService,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit() {
+    this.currentUser = this.authService.getCurrentUser();
+    
+    // Pré-remplir avec les infos de l'utilisateur connecté
+    if (this.currentUser) {
+      this.form.nom = this.currentUser.displayName || this.currentUser.username;
+      this.form.email = this.currentUser.email;
+      if (this.currentUser.ville) this.form.ville = this.currentUser.ville;
+      if (this.currentUser.promo) this.form.promo = this.currentUser.promo;
+      if (this.currentUser.avatarColor) this.selectedColor = this.currentUser.avatarColor;
+    }
+  }
 
   // Helpers pour split les strings en arrays
   private splitToArray(str: string): string[] {
@@ -290,9 +309,13 @@ export class TalentForm {
       projets: this.splitToArray(this.form.projets),
       tags: this.splitToArray(this.form.tags),
       verified: this.form.verified,
-      createdAt: new Date()
+      createdAt: new Date(),
+      
+      // Lien avec l'utilisateur connecté
+      userId: this.currentUser?.id
     };
 
+    console.log('🎯 [TALENT] Création talent avec userId:', talent.userId);
     this.talentService.addTalent(talent);
     this.talentCreated.emit(talent);
   }

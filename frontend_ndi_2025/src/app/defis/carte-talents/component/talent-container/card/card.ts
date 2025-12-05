@@ -6,12 +6,16 @@ import {
   Input,
   OnDestroy,
   ViewChild,
-  HostListener
+  HostListener,
+  OnInit
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Talent } from '../../../services/talent.service';
 import { CollaborationService, CollaborationRequest } from '../../../services/collaboration.service';
+import { AuthService, User } from '../../../../../auth/services/auth.service';
+import { MessagingService } from '../../../../../services/messaging.service';
 
 @Component({
   selector: 'app-card',
@@ -20,10 +24,13 @@ import { CollaborationService, CollaborationRequest } from '../../../services/co
   templateUrl: './card.html',
   styleUrls: ['./card.css']
 })
-export class Card implements AfterViewInit, OnDestroy {
+export class Card implements AfterViewInit, OnDestroy, OnInit {
   @Input({ required: true }) talent!: Talent;
   @Input() colorIndex: number = 0;
   @ViewChild('cardEl') cardEl!: ElementRef<HTMLElement>;
+
+  currentUser: User | null = null;
+  isLoggedIn = false;
 
   // Color themes for cards
   readonly colorThemes = [
@@ -63,7 +70,36 @@ export class Card implements AfterViewInit, OnDestroy {
     { value: 'other', label: '💬 Autre' }
   ];
 
-  constructor(private collaborationService: CollaborationService) {}
+  isSendingMessage = false;
+  lastConversationId: string | null = null;
+
+  constructor(
+    private collaborationService: CollaborationService,
+    private authService: AuthService,
+    private messagingService: MessagingService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.currentUser = this.authService.getCurrentUser();
+    this.isLoggedIn = this.authService.isLoggedIn();
+
+    // Pré-remplir le formulaire si connecté
+    if (this.currentUser) {
+      this.contactForm.fromName = this.currentUser.displayName || this.currentUser.username;
+      this.contactForm.fromEmail = this.currentUser.email;
+    }
+
+    // Écouter les changements d'auth
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      this.isLoggedIn = !!user;
+      if (user) {
+        this.contactForm.fromName = user.displayName || user.username;
+        this.contactForm.fromEmail = user.email;
+      }
+    });
+  }
 
   private animationFrameId: number | null = null;
   private hoverTimeoutId: number | undefined;
@@ -166,32 +202,125 @@ export class Card implements AfterViewInit, OnDestroy {
   closeContactModal() {
     this.isContactModalOpen = false;
     document.body.style.overflow = '';
-    // Reset form
-    this.contactForm = {
-      fromName: '',
-      fromEmail: '',
-      message: '',
-      projectType: 'collaboration',
-      skills: ''
-    };
+    // Reset message mais garder nom/email si connecté
+    this.contactForm.message = '';
+    this.contactForm.skills = '';
+    this.contactForm.projectType = 'collaboration';
   }
 
-  sendContactRequest() {
-    if (!this.contactForm.fromName || !this.contactForm.fromEmail || !this.contactForm.message) {
+  async sendContactRequest() {
+    if (!this.contactForm.message) {
       return;
     }
+
+    console.log('📤 [CONTACT] Envoi message...');
+    console.log('   - Connecté:', this.isLoggedIn);
+    console.log('   - User:', this.currentUser?.username);
+    console.log('   - Talent ID:', this.talent.id);
+    console.log('   - Talent userId:', this.talent.userId);
+
+    // Si l'utilisateur est connecté, enregistrer le message dans la BDD
+    if (this.isLoggedIn && this.currentUser) {
+      console.log('📨 [CONTACT] Envoi message via API...');
+      this.isSendingMessage = true;
+      
+      const projectLabel = this.getProjectTypeLabel(this.contactForm.projectType);
+      const fullMessage = `📋 ${projectLabel}\n\n${this.contactForm.message}`;
+      
+      try {
+        // Utiliser le userId du talent si disponible, sinon utiliser l'ID du talent comme référence
+        const targetId = this.talent.userId || `talent_${this.talent.id}`;
+        
+        const result = await this.messagingService.sendDirectMessage(
+          targetId,
+          fullMessage,
+          this.talent.id
+        );
+
+        console.log('✅ [CONTACT] Résultat:', result);
+        this.isSendingMessage = false;
+
+        if (result) {
+          this.contactSent = true;
+          this.lastConversationId = result.conversation;
+          setTimeout(() => {
+            this.closeContactModal();
+          }, 2000);
+          return;
+        }
+      } catch (error) {
+        console.error('❌ [CONTACT] Erreur:', error);
+        this.isSendingMessage = false;
+      }
+    }
+
+    // Si le message n'est pas parti via l'API, c'est un fallback
+    console.log('⚠️ [CONTACT] Message non envoyé via API');
+  }
+
+  /**
+   * Envoyer uniquement un message (pas de demande de collaboration)
+   */
+  async sendMessageOnly() {
+    if (!this.contactForm.message || !this.isLoggedIn || !this.currentUser) {
+      return;
+    }
+
+    console.log('💬 [MESSAGE] Envoi message simple...');
+    this.isSendingMessage = true;
+    
+    try {
+      const targetId = this.talent.userId || `talent_${this.talent.id}`;
+      const result = await this.messagingService.sendDirectMessage(
+        targetId,
+        this.contactForm.message,
+        this.talent.id
+      );
+
+      this.isSendingMessage = false;
+
+      if (result) {
+        this.contactSent = true;
+        this.lastConversationId = result.conversation;
+        setTimeout(() => {
+          this.closeContactModal();
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('❌ [MESSAGE] Erreur:', error);
+      this.isSendingMessage = false;
+    }
+  }
+
+  /**
+   * Envoyer une demande de collaboration
+   */
+  sendCollaborationRequest() {
+    // Vérifier les champs requis
+    if (!this.contactForm.message) {
+      return;
+    }
+    
+    if (!this.isLoggedIn && (!this.contactForm.fromName || !this.contactForm.fromEmail)) {
+      return;
+    }
+
+    console.log('🤝 [COLLAB] Création demande de collaboration...');
 
     const skills = this.contactForm.skills
       .split(',')
       .map(s => s.trim())
       .filter(s => s.length > 0);
 
+    // Créer la demande avec les infos de l'utilisateur connecté si disponible
     this.collaborationService.createRequest({
-      fromName: this.contactForm.fromName,
-      fromEmail: this.contactForm.fromEmail,
+      fromUserId: this.currentUser?.id,
+      fromName: this.currentUser?.displayName || this.currentUser?.username || this.contactForm.fromName,
+      fromEmail: this.currentUser?.email || this.contactForm.fromEmail,
       toTalentId: this.talent.id,
       toTalentName: this.talent.nom,
       toTalentEmail: this.talent.email || '',
+      toUserId: this.talent.userId,
       message: this.contactForm.message,
       projectType: this.contactForm.projectType,
       skills: skills
@@ -203,6 +332,12 @@ export class Card implements AfterViewInit, OnDestroy {
     setTimeout(() => {
       this.closeContactModal();
     }, 2500);
+  }
+
+  goToLogin() {
+    this.closeContactModal();
+    this.closeModal();
+    this.router.navigate(['/login']);
   }
 
   getProjectTypeLabel(type: string): string {

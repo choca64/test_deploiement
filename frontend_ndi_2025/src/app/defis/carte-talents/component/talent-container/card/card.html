@@ -26,17 +26,21 @@
 
       <!-- AVATAR SECTION -->
       <section class="card__avatar-section">
-        <div class="card__stat-main" *ngIf="talent.stats">
-          <span class="stat-name">{{ talent.stats.principale.nom }}</span>
-          <div class="stat-bar-mini">
-            <div class="stat-bar-mini__fill" [style.width.%]="talent.stats.principale.valeur"></div>
+        @if (talent.stats) {
+          <div class="card__stat-main">
+            <span class="stat-name">{{ talent.stats.principale.nom }}</span>
+            <div class="stat-bar-mini">
+              <div class="stat-bar-mini__fill" [style.width.%]="talent.stats.principale.valeur"></div>
+            </div>
           </div>
-        </div>
+        }
 
-        <div class="card__verified" *ngIf="talent.verified">
-          <span>✓</span>
-          <span>VERIFIED</span>
-        </div>
+        @if (talent.verified) {
+          <div class="card__verified">
+            <span>✓</span>
+            <span>VERIFIED</span>
+          </div>
+        }
 
         <div class="card__avatar" [ngStyle]="avatarStyle()">
           {{ talent.nom.charAt(0).toUpperCase() }}
@@ -49,36 +53,42 @@
       </section>
 
       <!-- SKILLS -->
-      <section class="card__skills">
-        <div class="skill-row" *ngIf="talent.competences?.[0]">
-          <div class="skill-energies">
-            <span class="energy" [ngClass]="'energy--' + getEnergyType(0)"></span>
+      <section class="card__skills">       
+         @if (talent.competences?.[0]) {
+          <div class="skill-row">
+            <div class="skill-energies">
+              <span class="energy" [ngClass]="'energy--' + getEnergyType(0)"></span>
+            </div>
+            <span class="skill-name">{{ talent.competences[0] }}</span>
+            <span class="skill-damage">+{{ getSkillDamage(0) }}</span>
           </div>
-          <span class="skill-name">{{ talent.competences[0] }}</span>
-          <span class="skill-damage">+{{ getSkillDamage(0) }}</span>
-        </div>
+        }
 
-        <div class="skill-row" *ngIf="talent.competences?.[1]">
-          <div class="skill-energies">
-            <span class="energy" [ngClass]="'energy--' + getEnergyType(1)"></span>
-            <span class="energy energy--rainbow"></span>
+        @if (talent.competences?.[1]) {
+          <div class="skill-row">
+            <div class="skill-energies">
+              <span class="energy" [ngClass]="'energy--' + getEnergyType(1)"></span>
+              <span class="energy energy--rainbow"></span>
+            </div>
+            <span class="skill-name">{{ talent.competences[1] }}</span>
+            <span class="skill-damage">+{{ getSkillDamage(1) }}</span>
           </div>
-          <span class="skill-name">{{ talent.competences[1] }}</span>
-          <span class="skill-damage">+{{ getSkillDamage(1) }}</span>
-        </div>
+        }
 
-        <div class="skill-row skill-row--special" *ngIf="talent.passions?.[0]">
-          <div class="skill-energies">
-            <span class="energy energy--rainbow"></span>
-            <span class="energy energy--rainbow"></span>
-            <span class="energy energy--rainbow"></span>
+        @if (talent.passions?.[0]) {
+          <div class="skill-row skill-row--special">
+            <div class="skill-energies">
+              <span class="energy energy--rainbow"></span>
+              <span class="energy energy--rainbow"></span>
+              <span class="energy energy--rainbow"></span>
+            </div>
+            <span class="skill-name">
+              {{ talent.passions[0] }}
+              <span class="gx-tag">GX</span>
+            </span>
+            <span class="skill-damage">{{ getImpactDamage() }}</span>
           </div>
-          <span class="skill-name">
-            {{ talent.passions[0] }}
-            <span class="gx-tag">GX</span>
-          </span>
-          <span class="skill-damage">{{ getImpactDamage() }}</span>
-        </div>
+        }
 
         <p class="skill-quote">"{{ talent.style.citation || 'Un talent unique' }}"</p>
       </section>
@@ -93,13 +103,15 @@
         <div class="footer-stat">
           <span class="footer-stat__label">Langues</span>
           <div class="footer-langs">
-            <span class="lang-tag" *ngFor="let lang of talent.langues?.slice(0, 3)">{{ lang }}</span>
+            @for (lang of talent.langues.slice(0, 3); track lang) {
+              <span class="lang-tag">{{ lang }}</span>
+            }
           </div>
         </div>
 
         <div class="footer-stat">
           <span class="footer-stat__label">Projets</span>
-          <span class="footer-stat__value">{{ talent.projets?.length || 0 }}</span>
+          <span class="footer-stat__value">{{ talent.projets.length || 0 }}</span>
         </div>
       </footer>
 
@@ -113,214 +125,311 @@
 </div>
 
 <!-- MODAL DETAIL VIEW -->
-<div class="modal-overlay" *ngIf="isModalOpen" (click)="onOverlayClick($event)">
-  <div class="modal-content">
-    
-    <!-- Close Button -->
-    <button class="modal-close" (click)="closeModal()">✕</button>
-
-    <!-- HORIZONTAL CARD LAYOUT -->
-    <div class="detail-card">
+@if (isModalOpen) {
+  <div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal-content">
       
-      <!-- LEFT: Avatar & Identity -->
-      <div class="detail-left">
-        <div class="detail-avatar-zone">
-          <div class="detail-avatar" [ngStyle]="avatarStyle()">
-            {{ talent.nom.charAt(0).toUpperCase() }}
-          </div>
-          <div class="detail-verified" *ngIf="talent.verified">
-            <span>✓</span> VERIFIED
-          </div>
-        </div>
+      <!-- Close Button -->
+      <button class="modal-close" (click)="closeModal()">✕</button>
+
+      <!-- HORIZONTAL CARD LAYOUT -->
+      <div class="detail-card">
         
-        <div class="detail-identity">
-          <div class="detail-level">
-            <span class="detail-level__label">Niveau</span>
-            <span class="detail-level__value">{{ getLevelNumber() }}</span>
-          </div>
-          <h2 class="detail-name">{{ talent.nom }}</h2>
-          <p class="detail-role">{{ getCategoryIcon() }} {{ talent.role }}</p>
-          <div class="detail-xp">
-            <span class="detail-xp__value">{{ talent.xpActuel || getXP() }}</span>
-            <span class="detail-xp__label">XP ⚡</span>
-          </div>
-        </div>
-
-        <div class="detail-meta">
-          <span *ngIf="talent.ville">📍 {{ talent.ville }}</span>
-          <span *ngIf="talent.promo">🎓 {{ talent.promo }}</span>
-          <span *ngIf="talent.email">✉️ {{ talent.email }}</span>
-        </div>
-      </div>
-
-      <!-- CENTER: Stats & Skills -->
-      <div class="detail-center">
-        <div class="detail-section">
-          <h3 class="detail-section__title">📊 Statistiques</h3>
-          <div class="detail-stats">
-            <div class="detail-stat" *ngIf="talent.stats">
-              <span class="detail-stat__name">{{ talent.stats.principale.nom }}</span>
-              <div class="detail-stat__bar">
-                <div class="detail-stat__fill" [style.width.%]="talent.stats.principale.valeur"></div>
-              </div>
-              <span class="detail-stat__value">{{ talent.stats.principale.valeur }}%</span>
+        <!-- LEFT: Avatar & Identity -->
+        <div class="detail-left">
+          <div class="detail-avatar-zone">
+            <div class="detail-avatar" [ngStyle]="avatarStyle()">
+              {{ talent.nom.charAt(0).toUpperCase() }}
             </div>
-            <div class="detail-stat" *ngFor="let stat of talent.stats?.secondaires">
-              <span class="detail-stat__name">{{ stat.nom }}</span>
-              <div class="detail-stat__bar">
-                <div class="detail-stat__fill" [style.width.%]="stat.valeur"></div>
+            @if (talent.verified) {
+              <div class="detail-verified">
+                <span>✓</span> VERIFIED
               </div>
-              <span class="detail-stat__value">{{ stat.valeur }}%</span>
+            }
+          </div>
+          
+          <div class="detail-identity">
+            <div class="detail-level">
+              <span class="detail-level__label">Niveau</span>
+              <span class="detail-level__value">{{ getLevelNumber() }}</span>
+            </div>
+            <h2 class="detail-name">{{ talent.nom }}</h2>
+            <p class="detail-role">{{ getCategoryIcon() }} {{ talent.role }}</p>
+            <div class="detail-xp">
+              <span class="detail-xp__value">{{ talent.xpActuel || getXP() }}</span>
+              <span class="detail-xp__label">XP ⚡</span>
             </div>
           </div>
-        </div>
 
-        <div class="detail-section">
-          <h3 class="detail-section__title">⚡ Compétences</h3>
-          <div class="detail-skills">
-            <span class="detail-skill" *ngFor="let skill of getAllSkills(); let i = index">
-              <span class="energy-dot" [ngClass]="'energy--' + getEnergyType(i)"></span>
-              {{ skill }}
-              <span class="skill-pts">+{{ getSkillDamage(i) }}</span>
-            </span>
+          <div class="detail-meta">
+            @if (talent.ville) {
+              <span>📍 {{ talent.ville }}</span>
+            }
+            @if (talent.promo) {
+              <span>🎓 {{ talent.promo }}</span>
+            }
+            @if (talent.email) {
+              <span>✉️ {{ talent.email }}</span>
+            }
           </div>
         </div>
 
-        <div class="detail-section" *ngIf="talent.passions?.length">
-          <h3 class="detail-section__title">❤️ Passions</h3>
-          <div class="detail-passions">
-            <span class="detail-passion" *ngFor="let passion of talent.passions">{{ passion }}</span>
+        <!-- CENTER: Stats & Skills -->
+        <div class="detail-center">
+          <div class="detail-section">
+            <h3 class="detail-section__title">📊 Statistiques</h3>
+            <div class="detail-stats">
+              @if (talent.stats) {
+                <div class="detail-stat">
+                  <span class="detail-stat__name">{{ talent.stats.principale.nom }}</span>
+                  <div class="detail-stat__bar">
+                    <div class="detail-stat__fill" [style.width.%]="talent.stats.principale.valeur"></div>
+                  </div>
+                  <span class="detail-stat__value">{{ talent.stats.principale.valeur }}%</span>
+                </div>
+              }
+              @for (stat of talent.stats.secondaires; track stat.nom) {
+                <div class="detail-stat">
+                  <span class="detail-stat__name">{{ stat.nom }}</span>
+                  <div class="detail-stat__bar">
+                    <div class="detail-stat__fill" [style.width.%]="stat.valeur"></div>
+                  </div>
+                  <span class="detail-stat__value">{{ stat.valeur }}%</span>
+                </div>
+              }
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- RIGHT: Extra Info -->
-      <div class="detail-right">
-        <div class="detail-section" *ngIf="getStrengths().length">
-          <h3 class="detail-section__title">💪 Forces</h3>
-          <ul class="detail-list">
-            <li *ngFor="let force of getStrengths()">{{ force }}</li>
-          </ul>
-        </div>
-
-        <div class="detail-section" *ngIf="talent.langues?.length">
-          <h3 class="detail-section__title">🌍 Langues</h3>
-          <div class="detail-langs">
-            <span class="detail-lang" *ngFor="let lang of talent.langues">{{ lang }}</span>
+          <div class="detail-section">
+            <h3 class="detail-section__title">⚡ Compétences</h3>
+            <div class="detail-skills">
+              @for (skill of getAllSkills(); track skill; let i = $index) {
+                <span class="detail-skill">
+                  <span class="energy-dot" [ngClass]="'energy--' + getEnergyType(i)"></span>
+                  {{ skill }}
+                  <span class="skill-pts">+{{ getSkillDamage(i) }}</span>
+                </span>
+              }
+            </div>
           </div>
+
+          @if (talent.passions.length) {
+            <div class="detail-section">
+              <h3 class="detail-section__title">❤️ Passions</h3>
+              <div class="detail-passions">
+                @for (passion of talent.passions; track passion) {
+                  <span class="detail-passion">{{ passion }}</span>
+                }
+              </div>
+            </div>
+          }
         </div>
 
-        <div class="detail-section" *ngIf="talent.projets?.length">
-          <h3 class="detail-section__title">🚀 Projets</h3>
-          <ul class="detail-list detail-list--projects">
-            <li *ngFor="let projet of talent.projets">{{ projet }}</li>
-          </ul>
-        </div>
+        <!-- RIGHT: Extra Info -->
+        <div class="detail-right">
+          @if (getStrengths().length) {
+            <div class="detail-section">
+              <h3 class="detail-section__title">💪 Forces</h3>
+              <ul class="detail-list">
+                @for (force of getStrengths(); track force) {
+                  <li>{{ force }}</li>
+                }
+              </ul>
+            </div>
+          }
 
-        <div class="detail-section" *ngIf="talent.tags?.length">
-          <h3 class="detail-section__title">🏷️ Tags</h3>
-          <div class="detail-tags">
-            <span class="detail-tag" *ngFor="let tag of talent.tags">{{ tag }}</span>
-          </div>
-        </div>
+          @if (talent.langues.length) {
+            <div class="detail-section">
+              <h3 class="detail-section__title">🌍 Langues</h3>
+              <div class="detail-langs">
+                @for (lang of talent.langues; track lang) {
+                  <span class="detail-lang">{{ lang }}</span>
+                }
+              </div>
+            </div>
+          }
 
-        <div class="detail-quote" *ngIf="talent.style?.citation">
-          <span class="quote-icon">"</span>
-          <p>{{ talent.style.citation }}</p>
-        </div>
+          @if (talent.projets.length) {
+            <div class="detail-section">
+              <h3 class="detail-section__title">🚀 Projets</h3>
+              <ul class="detail-list detail-list--projects">
+                @for (projet of talent.projets; track projet) {
+                  <li>{{ projet }}</li>
+                }
+              </ul>
+            </div>
+          }
 
-        <!-- CONTACT BUTTON -->
-        <button class="detail-contact-btn" (click)="openContactModal($event)">
-          <span>🤝</span> Contacter {{ talent.nom.split(' ')[0] }}
-        </button>
-      </div>
+          @if (talent.tags.length) {
+            <div class="detail-section">
+              <h3 class="detail-section__title">🏷️ Tags</h3>
+              <div class="detail-tags">
+                @for (tag of talent.tags; track tag) {
+                  <span class="detail-tag">{{ tag }}</span>
+                }
+              </div>
+            </div>
+          }
 
-    </div>
-  </div>
-</div>
+          @if (talent.style.citation) {
+            <div class="detail-quote">
+              <span class="quote-icon">"</span>
+              <p>{{ talent.style.citation }}</p>
+            </div>
+          }
 
-<!-- CONTACT MODAL -->
-<div class="contact-modal-overlay" *ngIf="isContactModalOpen" (click)="onOverlayClick($event)">
-  <div class="contact-modal">
-    <button class="contact-modal__close" (click)="closeContactModal()">✕</button>
-    
-    <!-- Success State -->
-    <div class="contact-success" *ngIf="contactSent">
-      <div class="success-icon">✅</div>
-      <h3>Message envoyé !</h3>
-      <p>Votre demande de collaboration a été envoyée à {{ talent.nom }}.</p>
-    </div>
-
-    <!-- Form State -->
-    <div class="contact-form" *ngIf="!contactSent">
-      <div class="contact-header">
-        <div class="contact-avatar" [ngStyle]="avatarStyle()">
-          {{ talent.nom.charAt(0).toUpperCase() }}
-        </div>
-        <div class="contact-info">
-          <h3>Contacter {{ talent.nom }}</h3>
-          <p>{{ talent.role }}</p>
-        </div>
-      </div>
-
-      <form (ngSubmit)="sendContactRequest()">
-        <div class="form-row">
-          <div class="form-field">
-            <label>Votre nom <span class="required">*</span></label>
-            <input 
-              type="text" 
-              [(ngModel)]="contactForm.fromName" 
-              name="fromName"
-              placeholder="Votre nom complet"
-              required>
-          </div>
-          <div class="form-field">
-            <label>Votre email <span class="required">*</span></label>
-            <input 
-              type="email" 
-              [(ngModel)]="contactForm.fromEmail" 
-              name="fromEmail"
-              placeholder="votre@email.com"
-              required>
-          </div>
-        </div>
-
-        <div class="form-field">
-          <label>Type de demande</label>
-          <select [(ngModel)]="contactForm.projectType" name="projectType">
-            <option *ngFor="let type of projectTypes" [value]="type.value">
-              {{ type.label }}
-            </option>
-          </select>
-        </div>
-
-        <div class="form-field">
-          <label>Compétences recherchées (optionnel)</label>
-          <input 
-            type="text" 
-            [(ngModel)]="contactForm.skills" 
-            name="skills"
-            placeholder="Ex: Angular, UX Design, Node.js">
-          <span class="form-hint">Séparées par des virgules</span>
-        </div>
-
-        <div class="form-field">
-          <label>Votre message <span class="required">*</span></label>
-          <textarea 
-            [(ngModel)]="contactForm.message" 
-            name="message"
-            rows="4"
-            placeholder="Présentez votre projet ou votre demande..."
-            required></textarea>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" class="btn-cancel" (click)="closeContactModal()">Annuler</button>
-          <button type="submit" class="btn-send" [disabled]="!contactForm.fromName || !contactForm.fromEmail || !contactForm.message">
-            📩 Envoyer la demande
+          <!-- CONTACT BUTTON -->
+          <button class="detail-contact-btn" (click)="openContactModal($event)">
+            <span>🤝</span> Contacter {{ talent.nom.split(' ')[0] }}
           </button>
         </div>
-      </form>
+
+      </div>
     </div>
   </div>
-</div>
+}
+
+<!-- CONTACT MODAL -->
+@if (isContactModalOpen) {
+  <div class="contact-modal-overlay" (click)="onOverlayClick($event)">
+    <div class="contact-modal">
+      <button class="contact-modal__close" (click)="closeContactModal()">✕</button>
+      
+      <!-- Success State -->
+      @if (contactSent) {
+        <div class="contact-success">
+          <div class="success-icon">✅</div>
+          <h3>Message envoyé !</h3>
+          <p>Votre message a été envoyé à {{ talent.nom }}.</p>
+          @if (isLoggedIn) {
+            <p class="success-hint">💬 Cliquez sur le bouton en bas à droite pour voir vos conversations</p>
+          }
+          <button class="btn-close-success" (click)="closeContactModal()">Fermer</button>
+        </div>
+      }
+
+      <!-- Form State -->
+      @if (!contactSent) {
+        <div class="contact-form">
+          <div class="contact-header">
+            <div class="contact-avatar" [ngStyle]="avatarStyle()">
+              {{ talent.nom.charAt(0).toUpperCase() }}
+            </div>
+            <div class="contact-info">
+              <h3>Contacter {{ talent.nom }}</h3>
+              <p>{{ talent.role }}</p>
+            </div>
+          </div>
+
+          <!-- Bannière utilisateur connecté -->
+          @if (isLoggedIn && currentUser) {
+            <div class="logged-user-banner">
+              <span class="user-avatar" [style.background]="currentUser.avatarColor">
+                {{ (currentUser.displayName || currentUser.username).charAt(0) }}
+              </span>
+              <div class="user-info">
+                <strong>{{ currentUser.displayName || currentUser.username }}</strong>
+                <span>{{ currentUser.email }}</span>
+              </div>
+              <span class="badge-connected">✅ Connecté</span>
+            </div>
+          }
+
+          <!-- Invitation à se connecter -->
+          @if (!isLoggedIn) {
+            <div class="login-invite">
+              <p>💡 <strong>Connectez-vous</strong> pour envoyer un message direct !</p>
+              <button type="button" class="btn-login-invite" (click)="goToLogin()">
+                Se connecter →
+              </button>
+            </div>
+          }
+
+          <form (ngSubmit)="sendContactRequest()">
+            <!-- Champs nom/email seulement si pas connecté -->
+            @if (!isLoggedIn) {
+              <div class="form-row">
+                <div class="form-field">
+                  <label>Votre nom <span class="required">*</span></label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="contactForm.fromName" 
+                    name="fromName"
+                    placeholder="Votre nom complet"
+                    required>
+                </div>
+                <div class="form-field">
+                  <label>Votre email <span class="required">*</span></label>
+                  <input 
+                    type="email" 
+                    [(ngModel)]="contactForm.fromEmail" 
+                    name="fromEmail"
+                    placeholder="votre@email.com"
+                    required>
+                </div>
+              </div>
+            }
+
+            <div class="form-field">
+              <label>Type de demande</label>
+              <select [(ngModel)]="contactForm.projectType" name="projectType">
+                @for (type of projectTypes; track type.value) {
+                  <option [value]="type.value">{{ type.label }}</option>
+                }
+              </select>
+            </div>
+
+            @if (!isLoggedIn) {
+              <div class="form-field">
+                <label>Compétences recherchées (optionnel)</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="contactForm.skills" 
+                  name="skills"
+                  placeholder="Ex: Angular, UX Design, Node.js">
+                <span class="form-hint">Séparées par des virgules</span>
+              </div>
+            }
+
+            <div class="form-field">
+              <label>Votre message <span class="required">*</span></label>
+              <textarea 
+                [(ngModel)]="contactForm.message" 
+                name="message"
+                rows="4"
+                placeholder="Présentez votre projet ou votre demande..."
+                required></textarea>
+            </div>
+
+            <div class="form-actions-split">
+              <button type="button" class="btn-cancel" (click)="closeContactModal()">Annuler</button>
+              
+              <div class="form-actions-right">
+                <!-- Bouton Proposer Collaboration -->
+                <button type="button" class="btn-collab" 
+                        (click)="sendCollaborationRequest()"
+                        [disabled]="(!isLoggedIn && (!contactForm.fromName || !contactForm.fromEmail)) || !contactForm.message || isSendingMessage">
+                  🤝 Proposer collaboration
+                </button>
+                
+                <!-- Bouton Envoyer Message (seulement si connecté) -->
+                @if (isLoggedIn) {
+                  <button type="button" class="btn-send" 
+                          (click)="sendMessageOnly()"
+                          [disabled]="!contactForm.message || isSendingMessage">
+                    @if (!isSendingMessage) {
+                      <span>💬 Message</span>
+                    }
+                    @if (isSendingMessage) {
+                      <span>⏳ Envoi...</span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          </form>
+        </div>
+      }
+    </div>
+  </div>
+}

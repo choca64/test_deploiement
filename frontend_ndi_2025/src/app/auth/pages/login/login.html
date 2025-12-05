@@ -1,0 +1,75 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <!-- Logo et titre -->
+    <div class="auth-header">
+      <div class="auth-logo">
+        <span class="logo-icon">🎯</span>
+        <span class="logo-text">TALENTS</span>
+      </div>
+      <h1 class="auth-title">Connexion</h1>
+      <p class="auth-subtitle">Accédez à votre espace talent</p>
+    </div>
+
+    <!-- Formulaire -->
+    <form class="auth-form" (ngSubmit)="onSubmit()">
+      <!-- Message d'erreur -->
+      <div class="error-message" *ngIf="error">
+        <span class="error-icon">⚠️</span>
+        {{ error }}
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <div class="input-wrapper">
+          <span class="input-icon">📧</span>
+          <input
+            type="email"
+            id="email"
+            [(ngModel)]="email"
+            name="email"
+            placeholder="votre@email.com"
+            required
+            [disabled]="isLoading"
+          />
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input
+            type="password"
+            id="password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="••••••••"
+            required
+            [disabled]="isLoading"
+          />
+        </div>
+      </div>
+
+      <!-- Bouton connexion -->
+      <button type="submit" class="btn-submit" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Se connecter →</span>
+        <span *ngIf="isLoading" class="loading-spinner">
+          <span class="spinner"></span>
+          Connexion...
+        </span>
+      </button>
+    </form>
+
+    <!-- Lien inscription -->
+    <div class="auth-footer">
+      <p>Pas encore de compte ?</p>
+      <a routerLink="/register" class="link-register">Créer un compte</a>
+    </div>
+
+    <!-- Retour accueil -->
+    <a routerLink="/landing-page" class="link-back">← Retour à l'accueil</a>
+  </div>
+</div>
+

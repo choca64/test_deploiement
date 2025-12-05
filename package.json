@@ -1,0 +1,18 @@
+{
+  "name": "ndi-2025",
+  "version": "1.0.0",
+  "description": "Projet Nuit de l'Info 2025 - Carte des Talents",
+  "scripts": {
+    "start": "concurrently -n BACK,FRONT -c blue,green \"npm:start:back\" \"npm:start:front\"",
+    "start:front": "npm --prefix frontend_ndi_2025 start",
+    "start:back": "npm --prefix backend_ndi_2025 run start:dev",
+    "build": "concurrently \"npm:build:front\" \"npm:build:back\"",
+    "build:front": "npm --prefix frontend_ndi_2025 run build",
+    "build:back": "npm --prefix backend_ndi_2025 run build",
+    "install:all": "npm --prefix frontend_ndi_2025 install && npm --prefix backend_ndi_2025 install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+

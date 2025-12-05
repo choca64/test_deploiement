@@ -1,0 +1,178 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <!-- Logo et titre -->
+    <div class="auth-header">
+      <div class="auth-logo">
+        <span class="logo-icon">✨</span>
+        <span class="logo-text">TALENTS</span>
+      </div>
+      <h1 class="auth-title">Inscription</h1>
+      <p class="auth-subtitle">Créez votre profil talent</p>
+      
+      <!-- Indicateur d'étapes -->
+      <div class="steps-indicator">
+        <div class="step" [class.active]="step === 1" [class.completed]="step > 1">
+          <span class="step-number">1</span>
+          <span class="step-label">Compte</span>
+        </div>
+        <div class="step-line" [class.active]="step > 1"></div>
+        <div class="step" [class.active]="step === 2">
+          <span class="step-number">2</span>
+          <span class="step-label">Profil</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulaire -->
+    <form class="auth-form" (ngSubmit)="step === 1 ? nextStep() : onSubmit()">
+      <!-- Message d'erreur -->
+      <div class="error-message" *ngIf="error">
+        <span class="error-icon">⚠️</span>
+        {{ error }}
+      </div>
+
+      <!-- Étape 1: Informations du compte -->
+      <div class="form-step" *ngIf="step === 1">
+        <!-- Username -->
+        <div class="form-group">
+          <label for="username">Nom d'utilisateur *</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input
+              type="text"
+              id="username"
+              [(ngModel)]="username"
+              name="username"
+              placeholder="votre_pseudo"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <div class="input-wrapper">
+            <span class="input-icon">📧</span>
+            <input
+              type="email"
+              id="email"
+              [(ngModel)]="email"
+              name="email"
+              placeholder="votre@email.com"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="form-group">
+          <label for="password">Mot de passe *</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input
+              type="password"
+              id="password"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="Min. 6 caractères"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Confirmation -->
+        <div class="form-group">
+          <label for="confirmPassword">Confirmer le mot de passe *</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔐</span>
+            <input
+              type="password"
+              id="confirmPassword"
+              [(ngModel)]="confirmPassword"
+              name="confirmPassword"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          Suivant →
+        </button>
+      </div>
+
+      <!-- Étape 2: Informations du profil -->
+      <div class="form-step" *ngIf="step === 2">
+        <!-- Nom affiché -->
+        <div class="form-group">
+          <label for="displayName">Nom affiché</label>
+          <div class="input-wrapper">
+            <span class="input-icon">✏️</span>
+            <input
+              type="text"
+              id="displayName"
+              [(ngModel)]="displayName"
+              name="displayName"
+              placeholder="Prénom Nom"
+            />
+          </div>
+          <span class="form-hint">Laissez vide pour utiliser votre pseudo</span>
+        </div>
+
+        <!-- Ville -->
+        <div class="form-group">
+          <label for="ville">Ville</label>
+          <div class="input-wrapper">
+            <span class="input-icon">📍</span>
+            <input
+              type="text"
+              id="ville"
+              [(ngModel)]="ville"
+              name="ville"
+              placeholder="Lyon, Paris..."
+            />
+          </div>
+        </div>
+
+        <!-- Promo -->
+        <div class="form-group">
+          <label for="promo">Promo / École</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🎓</span>
+            <input
+              type="text"
+              id="promo"
+              [(ngModel)]="promo"
+              name="promo"
+              placeholder="CESI 2025, Epitech..."
+            />
+          </div>
+        </div>
+
+        <div class="form-buttons">
+          <button type="button" class="btn-back" (click)="previousStep()">
+            ← Retour
+          </button>
+          <button type="submit" class="btn-submit" [disabled]="isLoading">
+            <span *ngIf="!isLoading">Créer mon compte 🚀</span>
+            <span *ngIf="isLoading" class="loading-spinner">
+              <span class="spinner"></span>
+              Création...
+            </span>
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Lien connexion -->
+    <div class="auth-footer">
+      <p>Déjà un compte ?</p>
+      <a routerLink="/login" class="link-login">Se connecter</a>
+    </div>
+
+    <!-- Retour accueil -->
+    <a routerLink="/landing-page" class="link-back">← Retour à l'accueil</a>
+  </div>
+</div>
+

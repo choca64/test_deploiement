@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 /**
  * ========================================
@@ -158,6 +160,9 @@ export interface Talent {
   tags: string[];
   verified: boolean;
   createdAt: Date;
+  
+  // ===== 13. LIEN UTILISATEUR =====
+  userId?: string;  // ID de l'utilisateur propriétaire du talent
 }
 
 /**
@@ -499,8 +504,8 @@ const MOCK_TALENTS: Talent[] = [
   }
 ];
 
-// Clé pour le localStorage
-const STORAGE_KEY = 'talents_cards';
+// URL de l'API Backend
+const API_URL = environment.apiUrl + '/api/talents';
 
 @Injectable({
   providedIn: 'root',
@@ -508,9 +513,10 @@ const STORAGE_KEY = 'talents_cards';
 export class TalentService {
 
   private readonly _talents$ = new BehaviorSubject<Talent[]>([]);
+  private isLoading = false;
 
-  constructor() {
-    this.loadFromStorage();
+  constructor(private http: HttpClient) {
+    this.loadFromAPI();
   }
 
   get talents$(): Observable<Talent[]> {
@@ -522,95 +528,213 @@ export class TalentService {
   }
 
   /**
-   * Charger les talents depuis le localStorage
-   * Si pas de données, utiliser les données mock
+   * Charger les talents depuis l'API Backend (Supabase)
    */
-  private loadFromStorage(): void {
+  async loadFromAPI(): Promise<void> {
+    if (this.isLoading) return;
+    this.isLoading = true;
+
+    console.log('🔄 [FRONTEND] Chargement des talents depuis l\'API...');
+    console.log('📡 [FRONTEND] URL:', API_URL);
+
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        // Convertir les dates string en objets Date
-        const talents = parsed.map((t: any) => ({
-          ...t,
-          createdAt: new Date(t.createdAt)
-        }));
-        this._talents$.next(talents);
-        console.log('✅ Talents chargés depuis localStorage:', talents.length);
-      } else {
-        // Première utilisation : charger les données mock
-        this._talents$.next([...MOCK_TALENTS]);
-        this.saveToStorage();
-        console.log('📦 Données mock chargées et sauvegardées');
+      const talents = await firstValueFrom(this.http.get<any[]>(API_URL));
+      
+      // Convertir les données de l'API au format frontend
+      const formattedTalents = talents.map(t => this.mapApiToTalent(t));
+      
+      this._talents$.next(formattedTalents);
+      console.log('✅ [FRONTEND] Talents chargés depuis SUPABASE via API:', formattedTalents.length);
+      
+      if (formattedTalents.length > 0) {
+        console.log('📋 [FRONTEND] Liste:');
+        formattedTalents.forEach((t, i) => console.log(`   ${i+1}. ${t.nom} - ${t.role}`));
       }
-    } catch (error) {
-      console.error('❌ Erreur chargement localStorage:', error);
+    } catch (error: any) {
+      console.error('❌ [FRONTEND] Erreur API:', error.message || error);
+      console.log('📦 [FRONTEND] Chargement des données mock en fallback...');
       this._talents$.next([...MOCK_TALENTS]);
+    } finally {
+      this.isLoading = false;
     }
   }
 
   /**
-   * Sauvegarder les talents dans le localStorage
+   * Mapper les données API vers le format Talent frontend
    */
-  private saveToStorage(): void {
+  private mapApiToTalent(apiData: any): Talent {
+    return {
+      id: apiData.id,
+      nom: apiData.nom,
+      age: apiData.age,
+      genre: apiData.genre,
+      origine: apiData.origine,
+      nationalite: apiData.nationalite,
+      ville: apiData.ville,
+      promo: apiData.promo,
+      email: apiData.email,
+      avatarUrl: apiData.avatar_url,
+      avatarInitials: apiData.avatar_initials,
+      avatarColor: apiData.avatar_color,
+      role: apiData.role,
+      niveau: apiData.niveau,
+      categorie: apiData.categorie,
+      bio: apiData.bio,
+      specificites: apiData.specificites || [],
+      domainesApplication: apiData.domaines_application || [],
+      stats: apiData.stats || { principale: { nom: '', valeur: 0 }, secondaires: [], tauxReussite: 0, precision: 0, rapidite: 0, impact: 'moyen' },
+      cout: apiData.cout || { energie: 0, fatigue: 0, ressourcesRequises: [] },
+      limites: apiData.limites || { conditions: [], risqueEchec: 0 },
+      competences: apiData.competences || [],
+      forcesPrincipales: apiData.forces_principales || [],
+      bonusPassifs: apiData.bonus_passifs || [],
+      effetsSpeciaux: apiData.effets_speciaux || [],
+      synergies: apiData.synergies || { talentsCompatibles: [], bonusEquipe: [], situationsExcellence: [], combos: [] },
+      faiblesses: apiData.faiblesses || { contreIndications: [], talentsNeutralisants: [], defautsNaturels: [], coutEleve: [] },
+      historique: apiData.historique || { acquisition: '', evolutionTemps: [] },
+      exemplesUtilisation: apiData.exemples_utilisation || [],
+      casReels: apiData.cas_reels || [],
+      evolution: apiData.evolution || { conditionsAmelioration: [], capacitesDebloquables: [], xpNecessaire: 0 },
+      xpActuel: apiData.xp_actuel || 0,
+      materielRequis: apiData.materiel_requis || [],
+      environnementIdeal: apiData.environnement_ideal || [],
+      competencesComplementaires: apiData.competences_complementaires || [],
+      style: apiData.style || {},
+      social: apiData.social || { appreciePar: [], redoutePar: [], influenceGroupe: '', compatibilitesProfils: [] },
+      langues: apiData.langues || [],
+      passions: apiData.passions || [],
+      projets: apiData.projets || [],
+      tags: apiData.tags || [],
+      verified: apiData.verified || false,
+      createdAt: new Date(apiData.created_at)
+    };
+  }
+
+  /**
+   * Mapper un Talent frontend vers le format API
+   */
+  private mapTalentToApi(talent: Partial<Talent>): any {
+    return {
+      nom: talent.nom,
+      age: talent.age,
+      genre: talent.genre,
+      origine: talent.origine,
+      nationalite: talent.nationalite,
+      ville: talent.ville,
+      promo: talent.promo,
+      email: talent.email,
+      avatar_url: talent.avatarUrl,
+      avatar_initials: talent.avatarInitials,
+      avatar_color: talent.avatarColor,
+      role: talent.role,
+      niveau: talent.niveau,
+      categorie: talent.categorie,
+      bio: talent.bio,
+      specificites: talent.specificites,
+      domaines_application: talent.domainesApplication,
+      stats: talent.stats,
+      cout: talent.cout,
+      limites: talent.limites,
+      competences: talent.competences,
+      forces_principales: talent.forcesPrincipales,
+      bonus_passifs: talent.bonusPassifs,
+      effets_speciaux: talent.effetsSpeciaux,
+      synergies: talent.synergies,
+      faiblesses: talent.faiblesses,
+      historique: talent.historique,
+      exemples_utilisation: talent.exemplesUtilisation,
+      cas_reels: talent.casReels,
+      evolution: talent.evolution,
+      xp_actuel: talent.xpActuel,
+      materiel_requis: talent.materielRequis,
+      environnement_ideal: talent.environnementIdeal,
+      competences_complementaires: talent.competencesComplementaires,
+      style: talent.style,
+      social: talent.social,
+      langues: talent.langues,
+      passions: talent.passions,
+      projets: talent.projets,
+      tags: talent.tags,
+      verified: talent.verified
+    };
+  }
+
+  /**
+   * Ajouter un nouveau talent via l'API
+   */
+  async addTalent(talent: Talent): Promise<void> {
+    console.log('✨ [FRONTEND] Création talent via API...', talent.nom);
+    
     try {
-      const talents = this._talents$.getValue();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(talents));
-      console.log('💾 Talents sauvegardés:', talents.length);
-    } catch (error) {
-      console.error('❌ Erreur sauvegarde localStorage:', error);
+      const apiData = this.mapTalentToApi(talent);
+      const created = await firstValueFrom(this.http.post<any>(API_URL, apiData));
+      
+      console.log('✅ [FRONTEND] Talent créé dans SUPABASE ! ID:', created.id);
+      
+      // Recharger la liste
+      await this.loadFromAPI();
+    } catch (error: any) {
+      console.error('❌ [FRONTEND] Erreur création:', error.message || error);
+      throw error;
     }
   }
 
   /**
-   * Ajouter un nouveau talent
+   * Mettre à jour un talent existant via l'API
    */
-  addTalent(talent: Talent): void {
-    const current = this._talents$.getValue();
-    // Générer un ID unique si pas fourni
-    if (!talent.id) {
-      talent.id = 'talent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  async updateTalent(id: string, partial: Partial<Talent>): Promise<void> {
+    console.log('📝 [FRONTEND] Mise à jour talent via API...', id);
+    
+    try {
+      const apiData = this.mapTalentToApi(partial);
+      await firstValueFrom(this.http.put(`${API_URL}/${id}`, apiData));
+      
+      console.log('✅ [FRONTEND] Talent mis à jour dans SUPABASE !');
+      
+      // Recharger la liste
+      await this.loadFromAPI();
+    } catch (error: any) {
+      console.error('❌ [FRONTEND] Erreur mise à jour:', error.message || error);
+      throw error;
     }
-    // Ajouter la date de création
-    if (!talent.createdAt) {
-      talent.createdAt = new Date();
+  }
+
+  /**
+   * Supprimer un talent via l'API
+   */
+  async deleteTalent(id: string): Promise<void> {
+    console.log('🗑️ [FRONTEND] Suppression talent via API...', id);
+    
+    try {
+      await firstValueFrom(this.http.delete(`${API_URL}/${id}`));
+      
+      console.log('✅ [FRONTEND] Talent supprimé de SUPABASE !');
+      
+      // Recharger la liste
+      await this.loadFromAPI();
+    } catch (error: any) {
+      console.error('❌ [FRONTEND] Erreur suppression:', error.message || error);
+      throw error;
     }
-    this._talents$.next([...current, talent]);
-    this.saveToStorage();
-    console.log('✨ Nouveau talent ajouté:', talent.nom);
   }
 
   /**
-   * Mettre à jour un talent existant
+   * Basculer le statut vérifié via l'API
    */
-  updateTalent(id: string, partial: Partial<Talent>): void {
-    const updated = this._talents$.getValue().map((t) =>
-      t.id === id ? { ...t, ...partial } : t
-    );
-    this._talents$.next(updated);
-    this.saveToStorage();
-  }
-
-  /**
-   * Supprimer un talent
-   */
-  deleteTalent(id: string): void {
-    const filtered = this._talents$.getValue().filter(t => t.id !== id);
-    this._talents$.next(filtered);
-    this.saveToStorage();
-    console.log('🗑️ Talent supprimé:', id);
-  }
-
-  /**
-   * Basculer le statut vérifié
-   */
-  toggleVerified(id: string): void {
-    const current = this._talents$.getValue();
-    const updated = current.map((t) =>
-      t.id === id ? { ...t, verified: !t.verified } : t
-    );
-    this._talents$.next(updated);
-    this.saveToStorage();
+  async toggleVerified(id: string): Promise<void> {
+    console.log('✓ [FRONTEND] Toggle verified via API...', id);
+    
+    try {
+      await firstValueFrom(this.http.patch(`${API_URL}/${id}/verify`, {}));
+      
+      console.log('✅ [FRONTEND] Statut vérifié mis à jour !');
+      
+      // Recharger la liste
+      await this.loadFromAPI();
+    } catch (error: any) {
+      console.error('❌ [FRONTEND] Erreur toggle:', error.message || error);
+      throw error;
+    }
   }
 
   /**
@@ -621,24 +745,29 @@ export class TalentService {
   }
 
   /**
+   * Recharger les données depuis l'API
+   */
+  async refresh(): Promise<void> {
+    await this.loadFromAPI();
+  }
+
+  /**
    * Réinitialiser avec les données mock (pour debug)
    */
   resetToMock(): void {
     this._talents$.next([...MOCK_TALENTS]);
-    this.saveToStorage();
-    console.log('🔄 Données réinitialisées avec les mock');
+    console.log('🔄 Données réinitialisées avec les mock (local uniquement)');
   }
 
   /**
-   * Effacer toutes les données
+   * Effacer toutes les données locales
    */
   clearAll(): void {
     this._talents$.next([]);
-    localStorage.removeItem(STORAGE_KEY);
-    console.log('🗑️ Toutes les données effacées');
+    console.log('🗑️ Toutes les données locales effacées');
   }
 
-  // Méthodes utilitaires
+  // Méthodes utilitaires (fonctionnent sur les données en mémoire)
   getTalentsByCategorie(categorie: CategorieTalent): Talent[] {
     return this._talents$.getValue().filter(t => t.categorie === categorie);
   }
@@ -659,9 +788,9 @@ export class TalentService {
   }
 
   /**
-   * Obtenir le nombre de talents créés par l'utilisateur (pas les mock)
+   * Obtenir le nombre de talents
    */
-  getUserTalentsCount(): number {
-    return this._talents$.getValue().filter(t => t.id.startsWith('talent_')).length;
+  getTalentsCount(): number {
+    return this._talents$.getValue().length;
   }
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CollaborationService, CollaborationRequest } from '../../services/collaboration.service';
+import { AuthService, User } from '../../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-collaborations-page',
@@ -13,18 +14,52 @@ import { CollaborationService, CollaborationRequest } from '../../services/colla
 })
 export class CollaborationsPage implements OnInit, OnDestroy {
   requests: CollaborationRequest[] = [];
-  private subscription?: Subscription;
+  currentUser: User | null = null;
+  private subscriptions: Subscription[] = [];
 
-  constructor(private collaborationService: CollaborationService) {}
+  constructor(
+    private collaborationService: CollaborationService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
-    this.subscription = this.collaborationService.requests$.subscribe(requests => {
-      this.requests = requests;
-    });
+    this.currentUser = this.authService.getCurrentUser();
+    
+    this.subscriptions.push(
+      this.collaborationService.requests$.subscribe(requests => {
+        this.requests = requests;
+      }),
+      this.authService.currentUser$.subscribe(user => {
+        this.currentUser = user;
+      })
+    );
   }
 
   ngOnDestroy() {
-    this.subscription?.unsubscribe();
+    this.subscriptions.forEach(s => s.unsubscribe());
+  }
+
+  /**
+   * Vérifier si une demande a été envoyée par l'utilisateur connecté
+   */
+  isSentByMe(request: CollaborationRequest): boolean {
+    if (!this.currentUser) return false;
+    return request.fromUserId === this.currentUser.id || 
+           request.fromEmail === this.currentUser.email;
+  }
+
+  /**
+   * Demandes reçues (envoyées par d'autres)
+   */
+  getReceivedPendingRequests(): CollaborationRequest[] {
+    return this.requests.filter(r => r.status === 'pending' && !this.isSentByMe(r));
+  }
+
+  /**
+   * Demandes envoyées par moi
+   */
+  getSentPendingRequests(): CollaborationRequest[] {
+    return this.requests.filter(r => r.status === 'pending' && this.isSentByMe(r));
   }
 
   getPendingRequests(): CollaborationRequest[] {

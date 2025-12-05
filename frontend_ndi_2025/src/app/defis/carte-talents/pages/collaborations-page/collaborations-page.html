@@ -17,148 +17,215 @@
       <p>Gérez vos demandes de mise en relation</p>
     </div>
     <div class="header-stats">
-      <div class="stat-box stat-box--pending">
-        <span class="stat-number">{{ getPendingRequests().length }}</span>
-        <span class="stat-label">En attente</span>
+      <div class="stat-box stat-box--received">
+        <span class="stat-number">{{ getReceivedPendingRequests().length }}</span>
+        <span class="stat-label">Reçues</span>
+      </div>
+      <div class="stat-box stat-box--sent">
+        <span class="stat-number">{{ getSentPendingRequests().length }}</span>
+        <span class="stat-label">Envoyées</span>
       </div>
       <div class="stat-box stat-box--accepted">
         <span class="stat-number">{{ getAcceptedRequests().length }}</span>
         <span class="stat-label">Acceptées</span>
       </div>
-      <div class="stat-box stat-box--total">
-        <span class="stat-number">{{ requests.length }}</span>
-        <span class="stat-label">Total</span>
-      </div>
     </div>
   </header>
 
   <!-- EMPTY STATE -->
-  <div class="empty-state" *ngIf="requests.length === 0">
-    <div class="empty-icon">📭</div>
-    <h2>Aucune demande</h2>
-    <p>Vous n'avez pas encore reçu ou envoyé de demande de collaboration.</p>
-    <a routerLink="/talents" class="btn-explore">
-      <span>👥</span> Explorer les talents
-    </a>
-  </div>
+  @if (requests.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h2>Aucune demande</h2>
+      <p>Vous n'avez pas encore reçu ou envoyé de demande de collaboration.</p>
+      <a routerLink="/talents" class="btn-explore">
+        <span>👥</span> Explorer les talents
+      </a>
+    </div>
+  }
 
   <!-- REQUESTS LIST -->
-  <div class="requests-container" *ngIf="requests.length > 0">
-    
-    <!-- PENDING REQUESTS -->
-    <section class="requests-section" *ngIf="getPendingRequests().length > 0">
-      <h2 class="section-title">
-        <span class="section-icon">⏳</span>
-        En attente ({{ getPendingRequests().length }})
-      </h2>
+  @if (requests.length > 0) {
+    <div class="requests-container">
       
-      <div class="requests-grid">
-        <article class="request-card request-card--pending" *ngFor="let request of getPendingRequests()">
-          <div class="request-header">
-            <div class="request-avatar">{{ request.fromName.charAt(0).toUpperCase() }}</div>
-            <div class="request-info">
-              <h3>{{ request.fromName }}</h3>
-              <span class="request-email">{{ request.fromEmail }}</span>
-            </div>
-            <span class="request-type">{{ getProjectTypeLabel(request.projectType) }}</span>
-          </div>
+      <!-- RECEIVED PENDING REQUESTS (can accept/decline) -->
+      @if (getReceivedPendingRequests().length > 0) {
+        <section class="requests-section">
+          <h2 class="section-title">
+            <span class="section-icon">📥</span>
+            Demandes reçues ({{ getReceivedPendingRequests().length }})
+          </h2>
           
-          <div class="request-target">
-            <span class="target-label">Pour :</span>
-            <span class="target-name">{{ request.toTalentName }}</span>
+          <div class="requests-grid">
+            @for (request of getReceivedPendingRequests(); track request.id) {
+              <article class="request-card request-card--pending">
+                <div class="request-header">
+                  <div class="request-avatar">{{ request.fromName.charAt(0).toUpperCase() }}</div>
+                  <div class="request-info">
+                    <h3>{{ request.fromName }}</h3>
+                    <span class="request-email">{{ request.fromEmail }}</span>
+                  </div>
+                  <span class="request-type">{{ getProjectTypeLabel(request.projectType) }}</span>
+                </div>
+                
+                <div class="request-target">
+                  <span class="target-label">Pour :</span>
+                  <span class="target-name">{{ request.toTalentName }}</span>
+                </div>
+                
+                <p class="request-message">{{ request.message }}</p>
+                
+                @if (request.skills.length > 0) {
+                  <div class="request-skills">
+                    @for (skill of request.skills; track skill) {
+                      <span class="skill-tag">{{ skill }}</span>
+                    }
+                  </div>
+                }
+                
+                <div class="request-footer">
+                  <span class="request-date">{{ formatDate(request.createdAt) }}</span>
+                  <div class="request-actions">
+                    <button class="btn-action btn-accept" (click)="acceptRequest(request.id)" title="Accepter">
+                      ✅ Accepter
+                    </button>
+                    <button class="btn-action btn-decline" (click)="declineRequest(request.id)" title="Refuser">
+                      ❌ Refuser
+                    </button>
+                  </div>
+                </div>
+              </article>
+            }
           </div>
-          
-          <p class="request-message">{{ request.message }}</p>
-          
-          <div class="request-skills" *ngIf="request.skills.length > 0">
-            <span class="skill-tag" *ngFor="let skill of request.skills">{{ skill }}</span>
-          </div>
-          
-          <div class="request-footer">
-            <span class="request-date">{{ formatDate(request.createdAt) }}</span>
-            <div class="request-actions">
-              <button class="btn-action btn-accept" (click)="acceptRequest(request.id)" title="Accepter">
-                ✅
-              </button>
-              <button class="btn-action btn-decline" (click)="declineRequest(request.id)" title="Refuser">
-                ❌
-              </button>
-              <button class="btn-action btn-email" (click)="openEmail(request.fromEmail, request)" title="Répondre par email">
-                📧
-              </button>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
+        </section>
+      }
 
-    <!-- ACCEPTED REQUESTS -->
-    <section class="requests-section" *ngIf="getAcceptedRequests().length > 0">
-      <h2 class="section-title">
-        <span class="section-icon">✅</span>
-        Acceptées ({{ getAcceptedRequests().length }})
-      </h2>
-      
-      <div class="requests-grid">
-        <article class="request-card request-card--accepted" *ngFor="let request of getAcceptedRequests()">
-          <div class="request-header">
-            <div class="request-avatar request-avatar--accepted">{{ request.fromName.charAt(0).toUpperCase() }}</div>
-            <div class="request-info">
-              <h3>{{ request.fromName }}</h3>
-              <span class="request-email">{{ request.fromEmail }}</span>
-            </div>
-            <span class="request-status status--accepted">{{ getStatusLabel(request.status) }}</span>
-          </div>
+      <!-- SENT PENDING REQUESTS (waiting for response) -->
+      @if (getSentPendingRequests().length > 0) {
+        <section class="requests-section">
+          <h2 class="section-title section-title--sent">
+            <span class="section-icon">📤</span>
+            Demandes envoyées ({{ getSentPendingRequests().length }})
+          </h2>
           
-          <p class="request-message">{{ request.message }}</p>
-          
-          <div class="request-footer">
-            <span class="request-date">{{ formatDate(request.createdAt) }}</span>
-            <div class="request-actions">
-              <button class="btn-action btn-email" (click)="openEmail(request.fromEmail, request)" title="Contacter">
-                📧 Contacter
-              </button>
-              <button class="btn-action btn-delete" (click)="deleteRequest(request.id)" title="Supprimer">
-                🗑️
-              </button>
-            </div>
+          <div class="requests-grid">
+            @for (request of getSentPendingRequests(); track request.id) {
+              <article class="request-card request-card--sent">
+                <div class="request-badge-sent">Envoyée par vous</div>
+                <div class="request-header">
+                  <div class="request-avatar request-avatar--sent">{{ request.toTalentName.charAt(0).toUpperCase() }}</div>
+                  <div class="request-info">
+                    <h3>À : {{ request.toTalentName }}</h3>
+                    <span class="request-email">{{ request.toTalentEmail || 'Email non renseigné' }}</span>
+                  </div>
+                  <span class="request-type">{{ getProjectTypeLabel(request.projectType) }}</span>
+                </div>
+                
+                <p class="request-message">{{ request.message }}</p>
+                
+                <div class="request-footer">
+                  <span class="request-date">{{ formatDate(request.createdAt) }}</span>
+                  <div class="request-actions">
+                    <span class="request-status status--waiting">⏳ En attente de réponse</span>
+                    <button class="btn-action btn-delete" (click)="deleteRequest(request.id)" title="Annuler">
+                      🗑️ Annuler
+                    </button>
+                  </div>
+                </div>
+              </article>
+            }
           </div>
-        </article>
-      </div>
-    </section>
+        </section>
+      }
 
-    <!-- DECLINED REQUESTS -->
-    <section class="requests-section" *ngIf="getDeclinedRequests().length > 0">
-      <h2 class="section-title section-title--muted">
-        <span class="section-icon">❌</span>
-        Refusées ({{ getDeclinedRequests().length }})
-      </h2>
-      
-      <div class="requests-grid">
-        <article class="request-card request-card--declined" *ngFor="let request of getDeclinedRequests()">
-          <div class="request-header">
-            <div class="request-avatar request-avatar--declined">{{ request.fromName.charAt(0).toUpperCase() }}</div>
-            <div class="request-info">
-              <h3>{{ request.fromName }}</h3>
-              <span class="request-email">{{ request.fromEmail }}</span>
-            </div>
-            <span class="request-status status--declined">{{ getStatusLabel(request.status) }}</span>
-          </div>
+      <!-- ACCEPTED REQUESTS -->
+      @if (getAcceptedRequests().length > 0) {
+        <section class="requests-section">
+          <h2 class="section-title">
+            <span class="section-icon">✅</span>
+            Acceptées ({{ getAcceptedRequests().length }})
+          </h2>
           
-          <p class="request-message">{{ request.message }}</p>
-          
-          <div class="request-footer">
-            <span class="request-date">{{ formatDate(request.createdAt) }}</span>
-            <div class="request-actions">
-              <button class="btn-action btn-delete" (click)="deleteRequest(request.id)" title="Supprimer">
-                🗑️ Supprimer
-              </button>
-            </div>
+          <div class="requests-grid">
+            @for (request of getAcceptedRequests(); track request.id) {
+              <article class="request-card request-card--accepted">
+                @if (isSentByMe(request)) {
+                  <div class="request-badge-sent">Envoyée par vous</div>
+                }
+                <div class="request-header">
+                  <div class="request-avatar request-avatar--accepted">
+                    {{ (isSentByMe(request) ? request.toTalentName : request.fromName).charAt(0).toUpperCase() }}
+                  </div>
+                  <div class="request-info">
+                    @if (isSentByMe(request)) {
+                      <h3>{{ request.toTalentName }}</h3>
+                      <span class="request-email">{{ request.toTalentEmail }}</span>
+                    } @else {
+                      <h3>{{ request.fromName }}</h3>
+                      <span class="request-email">{{ request.fromEmail }}</span>
+                    }
+                  </div>
+                  <span class="request-status status--accepted">{{ getStatusLabel(request.status) }}</span>
+                </div>
+                
+                <p class="request-message">{{ request.message }}</p>
+                
+                <div class="request-footer">
+                  <span class="request-date">{{ formatDate(request.createdAt) }}</span>
+                  <div class="request-actions">
+                    <button class="btn-action btn-email" (click)="openEmail(isSentByMe(request) ? request.toTalentEmail : request.fromEmail, request)" title="Contacter">
+                      📧 Contacter
+                    </button>
+                    <button class="btn-action btn-delete" (click)="deleteRequest(request.id)" title="Supprimer">
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              </article>
+            }
           </div>
-        </article>
-      </div>
-    </section>
+        </section>
+      }
 
-  </div>
+      <!-- DECLINED REQUESTS -->
+      @if (getDeclinedRequests().length > 0) {
+        <section class="requests-section">
+          <h2 class="section-title section-title--muted">
+            <span class="section-icon">❌</span>
+            Refusées ({{ getDeclinedRequests().length }})
+          </h2>
+          
+          <div class="requests-grid">
+            @for (request of getDeclinedRequests(); track request.id) {
+              <article class="request-card request-card--declined">
+                @if (isSentByMe(request)) {
+                  <div class="request-badge-sent">Envoyée par vous</div>
+                }
+                <div class="request-header">
+                  <div class="request-avatar request-avatar--declined">{{ request.fromName.charAt(0).toUpperCase() }}</div>
+                  <div class="request-info">
+                    <h3>{{ request.fromName }}</h3>
+                    <span class="request-email">{{ request.fromEmail }}</span>
+                  </div>
+                  <span class="request-status status--declined">{{ getStatusLabel(request.status) }}</span>
+                </div>
+                
+                <p class="request-message">{{ request.message }}</p>
+                
+                <div class="request-footer">
+                  <span class="request-date">{{ formatDate(request.createdAt) }}</span>
+                  <div class="request-actions">
+                    <button class="btn-action btn-delete" (click)="deleteRequest(request.id)" title="Supprimer">
+                      🗑️ Supprimer
+                    </button>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+
+    </div>
+  }
 </div>
-

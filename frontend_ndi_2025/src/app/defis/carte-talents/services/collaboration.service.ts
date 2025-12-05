@@ -6,11 +6,13 @@ import { BehaviorSubject, Observable } from 'rxjs';
  */
 export interface CollaborationRequest {
   id: string;
+  fromUserId?: string;      // ID de l'utilisateur qui envoie
   fromName: string;
   fromEmail: string;
   toTalentId: string;
   toTalentName: string;
   toTalentEmail: string;
+  toUserId?: string;        // ID de l'utilisateur propriétaire du talent (si existe)
   message: string;
   projectType: string;
   skills: string[];

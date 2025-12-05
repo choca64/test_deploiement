@@ -1,0 +1,122 @@
+<!-- Floating Message Button -->
+@if (isLoggedIn) {
+  <button class="msg-fab" (click)="togglePanel()" [class.has-unread]="unreadCount > 0">
+    <span class="msg-fab__icon">💬</span>
+    @if (unreadCount > 0) {
+      <span class="msg-fab__badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+    }
+  </button>
+}
+
+<!-- Messages Panel -->
+@if (isOpen) {
+  <div class="msg-panel" [class.minimized]="isPanelMinimized">
+    <!-- Panel Header -->
+    <div class="msg-panel__header">
+      @if (currentConversation) {
+        <button class="msg-panel__back" (click)="backToList()">←</button>
+        <div class="msg-panel__user">
+          <span class="msg-panel__avatar" [style.background]="getOtherParticipant(currentConversation)?.avatar_color || '#3DB4AD'">
+            {{ getOtherParticipant(currentConversation)?.display_name?.charAt(0) || '?' }}
+          </span>
+          <span class="msg-panel__name">{{ getOtherParticipant(currentConversation)?.display_name }}</span>
+        </div>
+      } @else {
+        <span class="msg-panel__title">💬 Messages</span>
+      }
+      <div class="msg-panel__actions">
+        <a routerLink="/messages" class="msg-panel__expand" (click)="closePanel()" title="Voir tout">↗</a>
+        <button class="msg-panel__minimize" (click)="minimizePanel()">{{ isPanelMinimized ? '▲' : '▼' }}</button>
+        <button class="msg-panel__close" (click)="closePanel()">✕</button>
+      </div>
+    </div>
+
+    <!-- Panel Content -->
+    @if (!isPanelMinimized) {
+      <div class="msg-panel__content">
+        
+        <!-- Conversations List -->
+        @if (!currentConversation) {
+          <div class="msg-conversations">
+            @if (isLoading) {
+              <div class="msg-loading">
+                <span class="spinner"></span>
+                Chargement...
+              </div>
+            }
+            
+            @if (!isLoading && conversations.length === 0) {
+              <div class="msg-empty">
+                <span>📭</span>
+                <p>Aucune conversation</p>
+                <small>Contactez un talent pour démarrer !</small>
+              </div>
+            }
+
+            @for (conv of conversations; track conv.id) {
+              <div class="msg-conv-item" [class.unread]="conv.unread_count > 0" (click)="selectConversation(conv)">
+                <span class="msg-conv-avatar" [style.background]="getOtherParticipant(conv)?.avatar_color || '#3DB4AD'">
+                  {{ getOtherParticipant(conv)?.display_name?.charAt(0) || '?' }}
+                </span>
+                <div class="msg-conv-info">
+                  <div class="msg-conv-header">
+                    <span class="msg-conv-name">{{ getOtherParticipant(conv)?.display_name || 'Utilisateur' }}</span>
+                    <span class="msg-conv-time">{{ formatTime(conv.updated_at) }}</span>
+                  </div>
+                  <p class="msg-conv-preview">{{ conv.last_message?.content || 'Nouvelle conversation' }}</p>
+                </div>
+                @if (conv.unread_count > 0) {
+                  <span class="msg-conv-badge">{{ conv.unread_count }}</span>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Chat View -->
+        @if (currentConversation) {
+          <div class="msg-chat">
+            <div class="msg-chat__messages" #messagesContainer>
+              @for (msg of messages; track msg.id) {
+                <div class="msg-bubble" [class.own]="isOwnMessage(msg)">
+                  @if (!isOwnMessage(msg)) {
+                    <span class="msg-bubble__avatar" [style.background]="msg.sender_avatar_color">
+                      {{ msg.sender_name.charAt(0) }}
+                    </span>
+                  }
+                  <div class="msg-bubble__content">
+                    <p>{{ msg.content }}</p>
+                    <span class="msg-bubble__time">{{ formatTime(msg.created_at) }}</span>
+                  </div>
+                </div>
+              }
+              
+              @if (isLoading) {
+                <div class="msg-loading small">
+                  <span class="spinner"></span>
+                </div>
+              }
+            </div>
+
+            <div class="msg-chat__input">
+              <input 
+                type="text"
+                [(ngModel)]="newMessage"
+                placeholder="Message..."
+                (keypress)="handleKeypress($event)"
+                [disabled]="isSending">
+              <button (click)="sendMessage()" [disabled]="!newMessage.trim() || isSending">
+                @if (isSending) {
+                  <span class="spinner small"></span>
+                } @else {
+                  📤
+                }
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}
+

@@ -2,6 +2,7 @@
 **/.env.development
 **/.env.production
 **/.venv
+**/environments/*
 /frontend/src/environments/*
 .env
 

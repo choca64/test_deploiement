@@ -1,0 +1,122 @@
+<div class="messages-page">
+  <!-- Header -->
+  <header class="messages-header">
+    <a routerLink="/landing-page" class="back-btn">← Retour</a>
+    <h1>💬 Messages</h1>
+  </header>
+
+  <div class="messages-container">
+    <!-- Liste des conversations -->
+    <aside class="conversations-list">
+      <div class="conversations-header">
+        <h2>Conversations</h2>
+      </div>
+
+      <div class="conversations-empty" *ngIf="conversations.length === 0 && !isLoading">
+        <span class="empty-icon">📭</span>
+        <p>Aucune conversation</p>
+        <span class="empty-hint">Contactez un talent pour démarrer !</span>
+      </div>
+
+      <div class="conversation-item" 
+           *ngFor="let conv of conversations"
+           [class.active]="currentConversation?.id === conv.id"
+           (click)="selectConversation(conv)">
+        
+        <div class="conv-avatar" [style.background]="getOtherParticipant(conv)?.avatar_color || '#3DB4AD'">
+          {{ getOtherParticipant(conv)?.display_name?.charAt(0)?.toUpperCase() || '?' }}
+        </div>
+
+        <div class="conv-info">
+          <div class="conv-header">
+            <span class="conv-name">{{ getOtherParticipant(conv)?.display_name || 'Utilisateur' }}</span>
+            <span class="conv-time">{{ formatTime(conv.updated_at) }}</span>
+          </div>
+          <p class="conv-preview">
+            {{ conv.last_message?.content || 'Nouvelle conversation' }}
+          </p>
+          <span class="conv-talent" *ngIf="conv.talent_name">
+            🎯 {{ conv.talent_name }}
+          </span>
+        </div>
+
+        <span class="conv-badge" *ngIf="conv.unread_count > 0">
+          {{ conv.unread_count }}
+        </span>
+      </div>
+    </aside>
+
+    <!-- Zone de chat -->
+    <main class="chat-area" [class.no-conversation]="!currentConversation">
+      
+      <!-- Pas de conversation sélectionnée -->
+      <div class="chat-empty" *ngIf="!currentConversation">
+        <span class="empty-icon">💬</span>
+        <h3>Sélectionnez une conversation</h3>
+        <p>Choisissez une conversation dans la liste ou contactez un talent</p>
+      </div>
+
+      <!-- Conversation active -->
+      <ng-container *ngIf="currentConversation">
+        <!-- Header du chat -->
+        <div class="chat-header">
+          <div class="chat-user">
+            <div class="chat-avatar" [style.background]="getOtherParticipant(currentConversation)?.avatar_color || '#3DB4AD'">
+              {{ getOtherParticipant(currentConversation)?.display_name?.charAt(0)?.toUpperCase() || '?' }}
+            </div>
+            <div class="chat-user-info">
+              <h3>{{ getOtherParticipant(currentConversation)?.display_name }}</h3>
+              <span class="chat-talent" *ngIf="currentConversation.talent_name">
+                À propos de {{ currentConversation.talent_name }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-messages" #messagesContainer>
+          <div class="message" 
+               *ngFor="let msg of messages"
+               [class.own]="isOwnMessage(msg)">
+            
+            <div class="message-avatar" 
+                 *ngIf="!isOwnMessage(msg)"
+                 [style.background]="msg.sender_avatar_color">
+              {{ msg.sender_name.charAt(0).toUpperCase() }}
+            </div>
+
+            <div class="message-content">
+              <div class="message-bubble">
+                {{ msg.content }}
+              </div>
+              <span class="message-time">{{ formatTime(msg.created_at) }}</span>
+            </div>
+          </div>
+
+          <div class="chat-loading" *ngIf="isLoading">
+            <span class="spinner"></span>
+            Chargement...
+          </div>
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input">
+          <textarea 
+            [(ngModel)]="newMessage"
+            placeholder="Écrivez votre message..."
+            (keypress)="handleKeypress($event)"
+            [disabled]="isSending"
+            rows="1"></textarea>
+          
+          <button class="send-btn" 
+                  (click)="sendMessage()" 
+                  [disabled]="!newMessage.trim() || isSending">
+            <span *ngIf="!isSending">📤</span>
+            <span *ngIf="isSending" class="spinner small"></span>
+          </button>
+        </div>
+      </ng-container>
+    </main>
+  </div>
+</div>
+

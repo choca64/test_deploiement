@@ -59,7 +59,92 @@
 
 .nav-actions {
   display: flex;
+  align-items: center;
   gap: 0.75rem;
+}
+
+/* Auth buttons */
+.nav-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.2rem;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 12px;
+  border: 3px solid #1a1a1a;
+  transition: all 0.3s ease;
+  background: #F5D547;
+  color: #1a1a1a;
+  box-shadow: 3px 3px 0 #1a1a1a;
+}
+
+.nav-login:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 #1a1a1a;
+}
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.8rem 0.3rem 0.3rem;
+  background: #fff;
+  border: 3px solid #1a1a1a;
+  border-radius: 50px;
+  box-shadow: 3px 3px 0 #1a1a1a;
+}
+
+.nav-user__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.nav-user__name {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #1a1a1a;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 12px;
+  border: 3px solid #1a1a1a;
+  transition: all 0.3s ease;
+  background: #fee2e2;
+  color: #dc2626;
+  box-shadow: 3px 3px 0 #1a1a1a;
+  cursor: pointer;
+}
+
+.nav-logout:hover {
+  background: #fecaca;
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 #1a1a1a;
 }
 
 .nav-collab {

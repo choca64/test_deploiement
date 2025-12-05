@@ -11,7 +11,22 @@
     </div>
 
     <nav class="nav-right">
-      <a routerLink="/talents" class="btn btn--header">Découvrir →</a>
+      <!-- Non connecté -->
+      <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/login" class="nav-link">Connexion</a>
+        <a routerLink="/register" class="btn btn--header">S'inscrire ✨</a>
+      </ng-container>
+      
+      <!-- Connecté -->
+      <ng-container *ngIf="isLoggedIn">
+        <div class="user-menu">
+          <div class="user-avatar" [style.background]="currentUser?.avatarColor || '#3DB4AD'">
+            {{ currentUser?.displayName?.charAt(0) || currentUser?.username?.charAt(0) || '?' }}
+          </div>
+          <span class="user-name">{{ currentUser?.displayName || currentUser?.username }}</span>
+        </div>
+        <button class="btn btn--header btn--logout" (click)="logout()">Déconnexion</button>
+      </ng-container>
     </nav>
   </header>
 

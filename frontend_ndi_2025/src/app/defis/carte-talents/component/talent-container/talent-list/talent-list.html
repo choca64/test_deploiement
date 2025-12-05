@@ -12,6 +12,23 @@
       <a routerLink="/add-talent" class="nav-create">
         <span>✨</span> Créer
       </a>
+      
+      <!-- Auth buttons -->
+      <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/login" class="nav-login">Connexion</a>
+      </ng-container>
+      
+      <ng-container *ngIf="isLoggedIn">
+        <div class="nav-user">
+          <div class="nav-user__avatar" [style.background]="currentUser?.avatarColor || '#3DB4AD'">
+            {{ currentUser?.displayName?.charAt(0) || currentUser?.username?.charAt(0) || '?' }}
+          </div>
+          <span class="nav-user__name">{{ currentUser?.displayName || currentUser?.username }}</span>
+        </div>
+        <button class="nav-logout" (click)="logout()">
+          <span>👋</span> Déco
+        </button>
+      </ng-container>
     </div>
   </nav>
 
