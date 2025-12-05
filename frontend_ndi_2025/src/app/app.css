@@ -20,10 +20,6 @@
   position: relative;
   min-height: 100vh;
   overflow-x: hidden;
-}
-:host {
-  display: block;
   width: 100%;
-  height: 100%;
 }
 
