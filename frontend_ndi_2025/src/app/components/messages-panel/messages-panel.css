@@ -344,56 +344,91 @@
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  background: #f9f9f9;
+  gap: 0.6rem;
+  background: linear-gradient(180deg, #f5f7f9 0%, #eef1f5 100%);
 }
 
+/* === Message Bubble Base === */
 .msg-bubble {
   display: flex;
   align-items: flex-end;
   gap: 0.5rem;
-  max-width: 80%;
+  max-width: 85%;
+  animation: msgAppear 0.2s ease-out;
 }
 
-.msg-bubble.own {
-  align-self: flex-end;
-  flex-direction: row-reverse;
+@keyframes msgAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === Messages de l'autre personne (GAUCHE) === */
+.msg-bubble:not(.own) {
+  align-self: flex-start;
+  flex-direction: row;
 }
 
 .msg-bubble__avatar {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Fredoka', sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   color: #fff;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   flex-shrink: 0;
+  border: 2px solid #1a1a1a;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.15);
 }
 
-.msg-bubble__content {
-  background: #fff;
-  padding: 0.6rem 0.9rem;
-  border-radius: 16px;
-  border-bottom-left-radius: 4px;
-  border: 2px solid #1a1a1a;
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+.msg-bubble:not(.own) .msg-bubble__content {
+  background: linear-gradient(135deg, #3DB4AD 0%, #2d9a94 100%);
+  padding: 0.7rem 1rem;
+  border-radius: 18px;
+  border-top-left-radius: 4px;
+  border: 3px solid #1a1a1a;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+}
+
+.msg-bubble:not(.own) .msg-bubble__content p {
+  color: #fff;
+}
+
+.msg-bubble:not(.own) .msg-bubble__time {
+  color: rgba(255,255,255,0.7);
+  text-align: left;
+}
+
+/* === Mes messages (DROITE) === */
+.msg-bubble.own {
+  align-self: flex-end;
+  flex-direction: row-reverse;
 }
 
 .msg-bubble.own .msg-bubble__content {
   background: linear-gradient(135deg, #F5D547 0%, #E8C84A 100%);
-  border-bottom-right-radius: 4px;
-  border-bottom-left-radius: 16px;
+  padding: 0.7rem 1rem;
+  border-radius: 18px;
+  border-top-right-radius: 4px;
+  border: 3px solid #1a1a1a;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.15);
 }
 
 .msg-bubble__content p {
   margin: 0;
   font-family: 'Quicksand', sans-serif;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-weight: 500;
+  font-size: 0.9rem;
+  line-height: 1.45;
   color: #1a1a1a;
   word-wrap: break-word;
 }
@@ -402,12 +437,35 @@
   display: block;
   font-size: 0.65rem;
   color: #888;
-  margin-top: 0.2rem;
+  margin-top: 0.3rem;
   text-align: right;
 }
 
 .msg-bubble.own .msg-bubble__time {
-  color: #666;
+  color: #6b5a1a;
+}
+
+/* === Date separators (future feature) === */
+.msg-date-separator {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0.5rem 0;
+}
+
+.msg-date-separator::before,
+.msg-date-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+}
+
+.msg-date-separator span {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.7rem;
+  color: #888;
+  text-transform: uppercase;
 }
 
 /* Chat Input */
